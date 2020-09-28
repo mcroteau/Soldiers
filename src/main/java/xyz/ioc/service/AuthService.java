@@ -6,11 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import xyz.ioc.common.Constants;
 import xyz.ioc.dao.AccountDao;
 import xyz.ioc.model.Account;
-import xyz.ioc.web.BaseController;
 
 public class AuthService {
 
-    private static final Logger log = Logger.getLogger(BaseController.class);
+    private static final Logger log = Logger.getLogger(AuthService.class);
 
     @Autowired
     private static Parakeet parakeet;

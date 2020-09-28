@@ -4,19 +4,12 @@ import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.validator.routines.EmailValidator;
-import org.apache.tika.metadata.Metadata;
-import org.apache.tika.parser.ParseContext;
-import org.apache.tika.parser.Parser;
-import org.apache.tika.parser.mp3.Mp3Parser;
 import org.imgscalr.Scalr;
 import org.imgscalr.Scalr.Rotation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.helpers.DefaultHandler;
-import xyz.ioc.model.MusicFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -76,30 +69,6 @@ public class Utilities {
 		return false;
 	}
 
-	
-	public String writeMp3(CommonsMultipartFile file, String dir){
-		
-		String[] contentTypes = new String[]{ "audio/mp3", "audio/mpeg" };
-		List<String> list = Arrays.asList(contentTypes);
-
-		if(!correctMimeType(list, file)){
-			return "";
-		}
-
-        String appPath = getApplicationPath();
-        String musicDir = appPath + dir;
-
-        String fileName = generateFileName(file);
-
-		boolean dirCreated = new File(musicDir).mkdirs();
-
-		write(file, musicDir, fileName);
-
-		String uri = dir + fileName;
-
-        return uri;
-	}
-
 
     public String writeVideo(CommonsMultipartFile file, String dir){
 
@@ -126,8 +95,6 @@ public class Utilities {
 
     }
 
-
-	//TODO:break & fix
 	public String write(CommonsMultipartFile file, String dir){
 
 		String[] contentTypes = new String[]{"image/png", "image/jpeg", "image/jpg", "image/gif"};
@@ -284,8 +251,6 @@ public class Utilities {
 	}
 
 
-
-
 	private String getFileExtension(final String path) {
 	    String result = null;
 	    if (path != null) {
@@ -299,8 +264,6 @@ public class Utilities {
 	    }
 	    return result;
 	}
-
-
 
 	public String generateRandomString(int n) {
         String CHARS = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";
