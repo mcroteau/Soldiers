@@ -55,34 +55,10 @@ public interface AccountDao {
 
 	public List<Account> search(String query, int offset);
 
-	public boolean incrementViews(ProfileView profileView);
-
-	public long getViews(Account account, long start, long end);
-
-	public long getAllViews(Account account);
-
-	public List<ProfileView> getViewsList(Account account, long start, long end);
-
-	public long getAllViewsAll();
-
-	public long likes(long id);
-
-	public boolean like(ProfileLike profileLike);
-
-	public boolean liked(ProfileLike profileLike);
-
-	public boolean unlike(ProfileLike profileLike);
-
 	public boolean updateDisabled(Account account);
 
 	public boolean suspend(Account account);
 
 	public boolean renew(Account account);
-
-	public boolean block(AccountBlock accountBlock);
-
-	public boolean blocked(AccountBlock accountBlock);
-
-	public boolean unblock(AccountBlock accountBlock);
 
 }

@@ -12,7 +12,5 @@ public interface RoleDao {
 	public Role find(String name);
 	
 	public void save(Role role);
-
-	// public Role save(Role role);
 	
 }
