@@ -77,5 +77,5 @@ public class AppStartup implements ApplicationListener<ContextRefreshedEvent>{
 
 	private void createApplicationGuestShelter() {
 	}
-	
+
 }

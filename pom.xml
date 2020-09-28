@@ -288,8 +288,6 @@
         <finalName>${project.artifactId}-${project.version}</finalName>
         <testOutputDirectory>output/test-classes</testOutputDirectory>
         <sourceDirectory>src/main/java</sourceDirectory>
-        <scriptSourceDirectory>src/main/scripts</scriptSourceDirectory>
-        <testSourceDirectory>src/test/java</testSourceDirectory>
 
         <resources>
             <resource>
@@ -317,7 +315,7 @@
 
         	    <configuration>
 					<webApp>
-        	            <contextPath>/b</contextPath>
+        	            <contextPath>/g</contextPath>
         	        </webApp>
         	    </configuration>
         	</plugin>

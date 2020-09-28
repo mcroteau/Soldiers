@@ -24,17 +24,19 @@ import xyz.ioc.common.Constants;
 import xyz.ioc.dao.*;
 import xyz.ioc.model.*;
 import xyz.ioc.common.Utilities;
+import xyz.ioc.service.AuthService;
 import xyz.ioc.service.EmailService;
 import xyz.ioc.service.PhoneService;
 
+import static xyz.ioc.service.AuthService.getAuthenticatedAccount;
+
 
 @Controller
-public class AccountController extends BaseController {
+public class AccountController {
 
 	private static final Logger log = Logger.getLogger(AccountController.class);
 
 	Gson gson = new Gson();
-
 
 	@Autowired
 	private Parakeet parakeet;
@@ -49,21 +51,6 @@ public class AccountController extends BaseController {
 	private RoleDao roleDao;
 
 	@Autowired
-	private FriendDao friendDao;
-
-	@Autowired
-	private MusicDao musicDao;
-
-	@Autowired
-	private MessageDao messageDao;
-
-	@Autowired
-	private PostDao postDao;
-
-	@Autowired
-	private NotificationDao notificationDao;
-
-	@Autowired
 	private EmailService emailService;
 
 	@Autowired
@@ -73,13 +60,13 @@ public class AccountController extends BaseController {
     @RequestMapping(value="/account/info", method=RequestMethod.GET)
     public @ResponseBody String info(ModelMap model, HttpServletRequest request){
 
-        if(!authenticated()){
+        if(!AuthService.authenticated()){
             Map<String, String> data = new HashMap<String, String>();
             data.put("error", "Not authenticated");
             return gson.toJson(data);
         }
 
-        Account account = getAuthenticatedAccount();
+        Account account = AuthService.getAuthenticatedAccount();
         return gson.toJson(account);
     }
 
@@ -93,7 +80,7 @@ public class AccountController extends BaseController {
 				    @RequestParam(value="max", required = false ) String max,
 				    @RequestParam(value="page", required = false ) String page){
 
-		if(!administrator()){
+		if(!AuthService.administrator()){
 			redirect.addFlashAttribute("error", "You are not administrator.");
 			return "redirect:/";
 		}
@@ -138,8 +125,8 @@ public class AccountController extends BaseController {
 						 final RedirectAttributes redirect,
 					     @PathVariable String id){
 
-		if(administrator() || 
-				hasPermission(Constants.ACCOUNT_MAINTENANCE + id)){
+		if(AuthService.administrator() ||
+				AuthService.hasPermission(Constants.ACCOUNT_MAINTENANCE + id)){
 
 			Account account = accountDao.get(Long.parseLong(id));
 			model.addAttribute("account", account);
@@ -160,8 +147,8 @@ public class AccountController extends BaseController {
 					     	@PathVariable String id){
 
 
-		if(administrator() ||
-				hasPermission("account:maintenance:" + id)){
+		if(AuthService.administrator() ||
+				AuthService.hasPermission("account:maintenance:" + id)){
 
 
 			Account account = accountDao.get(Long.parseLong(id));
@@ -190,8 +177,8 @@ public class AccountController extends BaseController {
 
 		String imageFileUri = "";
 
-		if(administrator() || 
-				hasPermission(Constants.ACCOUNT_MAINTENANCE + id)){
+		if(AuthService.administrator() ||
+				AuthService.hasPermission(Constants.ACCOUNT_MAINTENANCE + id)){
 
 
 			if(uploadedProfileImage != null &&
@@ -243,8 +230,8 @@ public class AccountController extends BaseController {
 						 final RedirectAttributes redirect,
 					     @PathVariable String id){
 
-		if(administrator() || 
-				hasPermission("account:maintenance:" + id)){
+		if(AuthService.administrator() ||
+				AuthService.hasPermission("account:maintenance:" + id)){
 
 			Account account = accountDao.get(Long.parseLong(id));
 			model.addAttribute("account", account);
@@ -271,8 +258,8 @@ public class AccountController extends BaseController {
 			return "redirect:/signup";
 		}
 
-		if(administrator() || 
-				hasPermission("account:maintenance:" + account.getId())){
+		if(AuthService.administrator() ||
+				AuthService.hasPermission("account:maintenance:" + account.getId())){
 			
 			if(!account.getPassword().equals("")){
 				String password = utilities.hash(account.getPassword());
@@ -295,18 +282,12 @@ public class AccountController extends BaseController {
 								  final RedirectAttributes redirect,
 								  @PathVariable String id) {
 
-		if(!administrator()){
+		if(!AuthService.administrator()){
 			redirect.addFlashAttribute("error", "You don't hava permissionsa...");
 			return "redirect:/accounts";
 		}
 
 		Account account = accountDao.get(Long.parseLong(id));
-		List<Post> posts = postDao.fetchUserPosts(Long.parseLong(id));
-		for(Post post : posts){
-			postDao.hide(post.getId());
-			postDao.removePostShares(post.getId());
-		}
-
 		account.setDisabled(true);
 		account.setDateDisabled(utilities.getCurrentDate());
 		accountDao.suspend(account);
@@ -371,14 +352,12 @@ public class AccountController extends BaseController {
 			accountDao.save(account);	
 			
 			Account savedAccount = accountDao.findByUsername(account.getUsername());
-			preloadConnections(savedAccount);
-
 			Role defaultRole = roleDao.find(Constants.ROLE_ACCOUNT);
 
 			accountDao.saveAccountRole(savedAccount.getId(), defaultRole.getId());
 			accountDao.saveAccountPermission(savedAccount.getId(), "account:maintenance:" + savedAccount.getId());
 
-			String body = "<h1>Zeus</h1>"+
+			String body = "<h1>Soldiers Fish</h1>"+
 					"<p>Thank you for registering! Enjoy!</p>";
 
 			emailService.send(savedAccount.getUsername(), "Successfully Registered", body);
@@ -459,18 +438,16 @@ public class AccountController extends BaseController {
 			accountDao.save(account);	
 			
 			Account savedAccount = accountDao.findByUsername(account.getUsername());
-			preloadConnections(savedAccount);
-
 			Role defaultRole = roleDao.find(Constants.ROLE_ACCOUNT);
 
 			accountDao.saveAccountRole(savedAccount.getId(), defaultRole.getId());
 			accountDao.saveAccountPermission(savedAccount.getId(), "account:maintenance:" + savedAccount.getId());
 
-			String body = "<h1>Zeus</h1>"+
+			String body = "<h1>God's Lions</h1>"+
 					"<p>Thank you for registering! Enjoy!</p>";
 
 			emailService.send(savedAccount.getUsername(), "Successfully Registered", body);
-			phoneService.support("Zeus : Registration " + account.getName() + " " + account.getUsername());
+			phoneService.support("Soldiers Fish : Registration " + account.getName() + " " + account.getUsername());
 
         }catch(Exception e){
 			e.printStackTrace();
@@ -490,54 +467,18 @@ public class AccountController extends BaseController {
 
 		Map<String, Object> data = new HashMap<String, Object>();
 
-		if(!authenticated()){
+		if(!AuthService.authenticated()){
 			data.put("error", "Authentication required");
 			return gson.toJson(data);
 		}
 
 		Account account = accountDao.get(Long.parseLong(id));
-		Account authenticatedAccount = getAuthenticatedAccount();
+		Account authenticatedAccount = AuthService.getAuthenticatedAccount();
 
 		if(account.getId() == authenticatedAccount.getId()){
 			account.setOwnersAccount(true);
 		}
-
-		boolean ifFriend = friendDao.isFriend(authenticatedAccount.getId(), account.getId());
-		if(ifFriend){
-			account.setIsFriend(true);
-		}
-
-		AccountBlock blok = new AccountBlock.Builder()
-				.forPerson(Long.parseLong(id))
-				.byBlocker(authenticatedAccount.getId())
-				.build();
-
-		if(accountDao.blocked(blok)){
-			account.setBlocked(true);
-		}
-
-		List<Friend> friends = friendDao.getFriends(Long.parseLong(id));
-        for(Friend friend : friends){
-            if(messageDao.hasMessages(friend.getFriendId(), getAuthenticatedAccount().getId()))
-                friend.setHasMessages(true);
-        }
-
-		long likes = accountDao.likes(account.getId());
-        if(likes > 0){
-        	account.setLiked(true);
-		}
-		account.setLikes(likes);
-
         data.put("profile", account);
-        data.put("friends", friends);
-
-        ProfileView view = new ProfileView.Builder()
-				.profile(account.getId())
-				.viewer(authenticatedAccount.getId())
-				.date(utilities.getCurrentDate())
-				.build();
-
-        accountDao.incrementViews(view);
 
 		return gson.toJson(data);
 	}
@@ -577,7 +518,7 @@ public class AccountController extends BaseController {
 			resetUrl += params;
 
 
-			String body = "<h1>Zeus</h1>" +
+			String body = "<h1>Soldiers Fish</h1>" +
 					"<p>Reset Password :" +
 					"<a href=\"" + resetUrl + "\">" + resetUrl + "</a></p>";
 
@@ -641,9 +582,6 @@ public class AccountController extends BaseController {
 
 			if(parakeet.login(Constants.GUEST_USERNAME, Constants.GUEST_PASSWORD)) {
 				Account sessionAccount = getAuthenticatedAccount();
-//				parakeet.store("account", sessionAccount);
-//				parakeet.store("imageUri", sessionAccount.getImageUri());
-
 				request.getSession(false).setAttribute("account", sessionAccount);
 				request.getSession(false).setAttribute("imageUri", sessionAccount.getImageUri());
 			}
@@ -655,200 +593,11 @@ public class AccountController extends BaseController {
 	}
 
 
-	private void preloadConnections(Account authenticatedAccount){
-		Account adminAccount = accountDao.findByUsername(Constants.ADMIN_USERNAME);
-		friendDao.saveConnection(adminAccount.getId(), authenticatedAccount.getId(), utilities.getCurrentDate());
-	}
-
-
-	@RequestMapping(value="/profile/like/{id}", method=RequestMethod.POST,  produces="application/json")
-	public @ResponseBody String like(ModelMap model,
-									 HttpServletRequest request,
-									 final RedirectAttributes redirect,
-									 @PathVariable String id){
-
-		Gson gson = new Gson();
-		Map<String, Object> responseData = new HashMap<String, Object>();
-
-		if(!authenticated()){
-			responseData.put("error", "authentication required");
-			return gson.toJson(responseData);
-		}
-
-		Account account = getAuthenticatedAccount();
-
-		ProfileLike profileLike = new ProfileLike();
-		profileLike.setLikerId(account.getId());
-		profileLike.setProfileId(Long.parseLong(id));
-		profileLike.setDateLiked(utilities.getCurrentDate());
-
-		boolean result = false;
-
-		boolean existingProfileLike = accountDao.liked(profileLike);
-
-		if(existingProfileLike) {
-			responseData.put("action", "removed");
-			result = accountDao.unlike(profileLike);
-		}
-		else{
-			result = accountDao.like(profileLike);
-			responseData.put("action", "added");
-		}
-
-		long likes = accountDao.likes(Long.parseLong(id));
-
-
-		responseData.put("success", result);
-		responseData.put("likes", likes);
-		responseData.put("id", Long.parseLong(id));
-
-		return gson.toJson(responseData);
-	}
-
-
-
-	@RequestMapping(value="/profile/block/{id}", method=RequestMethod.POST,  produces="application/json")
-	public @ResponseBody String blockUser(ModelMap model,
-									 HttpServletRequest request,
-									 final RedirectAttributes redirect,
-									 @PathVariable String id) {
-		Gson gson = new Gson();
-		Map<String, Object> resp = new HashMap<String, Object>();
-
-		if(!authenticated()){
-			resp.put("error", "authentication required");
-			return gson.toJson(resp);
-		}
-
-		Account account = getAuthenticatedAccount();
-
-		if(account.getId() == Long.parseLong(id)){
-			resp.put("error", "cannot block yourself b");
-			return gson.toJson(resp);
-		}
-
-
-		AccountBlock blok = new AccountBlock.Builder()
-				.forPerson(Long.parseLong(id))
-				.byBlocker(account.getId())
-				.atDateBlocked(utilities.getCurrentDate())
-				.build();
-
-		log.info("b: " + blok.toString());
-
-		if(accountDao.blocked(blok)){
-			resp.put("success", "unblocked");
-			accountDao.unblock(blok);
-		}else{
-			resp.put("success", "blocked");
-			accountDao.block(blok);
-		}
-
-		return gson.toJson(resp);
-	}
-
-
-	@RequestMapping(value="/profile/data", method=RequestMethod.GET, produces="application/json")
-	public @ResponseBody String data(ModelMap model,
-									 HttpServletRequest request,
-									 final RedirectAttributes redirect){
-
-    	Map<String, Object> data = new HashMap<String, Object>();
-
-		if(!authenticated()){
-			System.out.println("not authenticated");
-			data.put("error", "Authentication required");
-			return gson.toJson(data);
-		}
-
-		Account account = getAuthenticatedAccount();
-
-		List<Post> latestPostsTiny = getLatestPostsSkinny(account, request);
-		long messagesCount = messageDao.countByAccount(account);
-		long notificationsCount = notificationDao.countByAccount(account);
-		long invitationsCount = friendDao.countInvitesByAccount(account);
-
-		data.put("latestPosts", latestPostsTiny);
-		data.put("messagesCount", messagesCount);
-		data.put("notificationsCount", notificationsCount);
-		data.put("invitationsCount", invitationsCount);
-
-    	return gson.toJson(data);
-	}
-
-
-	private List<Post> getLatestPostsSkinny(Account account, HttpServletRequest request){
-		List<Post> latest = new ArrayList<Post>();
-
-		try {
-
-			if (request.getSession().getAttribute("feed-request-time") != null) {
-				long start = (Long) request.getSession().getAttribute("feed-request-time");
-				long end = utilities.getCurrentDate();
-				latest = postDao.getLatestPostsSkinny(start, end, account.getId());
-			}
-
-		}catch(Exception e){
-			// log.error(e.getMessage());
-		}
-
-		return latest;
-	}
-
-
-
-	@RequestMapping(value="/profile/data/views", method=RequestMethod.GET, produces="application/json")
-	public @ResponseBody String views(ModelMap model,
-										final RedirectAttributes redirect){
-		Map<String, Object> viewsData = new HashMap<String, Object>();
-
-		if(!authenticated()){
-			viewsData.put("error", "Authentication required");
-			return gson.toJson(viewsData);
-		}
-
-		Account account = getAuthenticatedAccount();
-
-		long end = utilities.getCurrentDate();
-
-		List<String> labels = new ArrayList<String>();
-		List<Long> counts = new ArrayList<Long>();
-		;
-		int day = 31;
-		long currentDate = utilities.getPreviousDay(day);
-
-		for(int n = 32; n != 0; n--){
-			long date = utilities.getPreviousDay(n);
-			long count = accountDao.getViews(account, date, currentDate);
-
-			String datef = utilities.getGraphDate(n);
-			labels.add(datef);
-			counts.add(count);
-
-			day--;
-			currentDate = utilities.getPreviousDay(day);
-		}
-
-
-		long weekCount = accountDao.getViews(account, utilities.getPreviousDay(7), end);
-		long monthCount = accountDao.getViews(account, utilities.getPreviousDay(31), end);
-		long allTimeCount = accountDao.getAllViews(account);
-
-		viewsData.put("labels", labels);
-		viewsData.put("counts", counts);
-		viewsData.put("week", weekCount);
-		viewsData.put("month", monthCount);
-		viewsData.put("all", allTimeCount);
-
-		return gson.toJson(viewsData);
-	}
-
-
 	@RequestMapping(value="/account/suspend/{id}", method=RequestMethod.POST)
 	public String suspend(ModelMap model,
 					   final RedirectAttributes redirect,
 					   @PathVariable String id){
-		if(!administrator()){
+		if(!AuthService.administrator()){
 			redirect.addFlashAttribute("message", "You don't have permission to do this!");
 			return "redirect:/account/profile/" + id;
 		}
@@ -867,7 +616,7 @@ public class AccountController extends BaseController {
 						  final RedirectAttributes redirect,
 						  @PathVariable String id){
 
-		if(!administrator()){
+		if(!AuthService.administrator()){
 			redirect.addFlashAttribute("message", "You don't have permission to do this!");
 			return "redirect:/account/profile/" + id;
 		}

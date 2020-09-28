@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import xyz.ioc.common.Utilities;
 import xyz.ioc.model.Account;
+import xyz.ioc.service.AuthService;
 import xyz.ioc.service.EmailService;
 import xyz.ioc.service.PhoneService;
 
@@ -18,7 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 
 @Controller
-public class StaticController extends BaseController {
+public class StaticController {
 
 	private static final Logger log = Logger.getLogger(StaticController.class);
 
@@ -39,11 +40,11 @@ public class StaticController extends BaseController {
 						 HttpServletResponse resp,
 						 final RedirectAttributes redirect){
 
-		if(!authenticated()){
+		if(!AuthService.authenticated()){
 			return "redirect:/uno";
 		}
 
-		Account account = getAuthenticatedAccount();
+		Account account = AuthService.getAuthenticatedAccount();
 		if(account.isDisabled()) {
 			return "redirect:/account/edit/" + account.getId();
 		}
@@ -60,11 +61,11 @@ public class StaticController extends BaseController {
 	@RequestMapping(value="/mobile", method=RequestMethod.GET)
 	public String mobile(Device device, HttpServletRequest req){
 
-		if(!authenticated()){
+		if(!AuthService.authenticated()){
 			return "redirect:/uno";
 		}
 
-		Account account = getAuthenticatedAccount();
+		Account account = AuthService.getAuthenticatedAccount();
 		if(account.isDisabled()) {
 			return "redirect:/account/edit/" + account.getId();
 		}
@@ -137,7 +138,7 @@ public class StaticController extends BaseController {
 		sb.append(email);
 		sb.append("<br/>");
 		sb.append(issue);
-		emailService.send("croteau.mike+zeus@gmail.com", "Zeus", sb.toString());
+		emailService.send("croteau.mike+soldiers@gmail.com", "Soldiers Fish", sb.toString());
 
 		model.addAttribute("message", "Thank you. Issue has been reported.");
 		return "success";
@@ -156,19 +157,19 @@ public class StaticController extends BaseController {
 			final RedirectAttributes redirect,
 			ModelMap model){
 
-		if(!authenticated()){
+		if(!AuthService.authenticated()){
 			redirect.addFlashAttribute("error", "Please signin to continue...");
 			return "redirect:/signin";
 		}
 
-		Account account = getAuthenticatedAccount();
+		Account account = AuthService.getAuthenticatedAccount();
 
 		if (emails.equals("")) {
 			redirect.addFlashAttribute("error", "Please enter valid email addresses");
 			return "redirect:/invite";
 		}
 
-		String body = "<h1>Zeus</h1>" +
+		String body = "<h1>Soldiers Fish</h1>" +
 				"<p>" + account.getName() + " invited you to join Zeus! " +
 				"<a href=\"https://zeus.social\">https://zeus.social</a>";
 
