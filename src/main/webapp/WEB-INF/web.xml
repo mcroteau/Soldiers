@@ -9,13 +9,13 @@
 	</listener>
 	
   	<servlet>
-  		<servlet-name>b</servlet-name>
+  		<servlet-name>g</servlet-name>
     	<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
     	<load-on-startup>1</load-on-startup>  
     </servlet>
 
   	<servlet-mapping>
-    	<servlet-name>b</servlet-name>
+    	<servlet-name>g</servlet-name>
     	<url-pattern>/</url-pattern>
   	</servlet-mapping>
 
@@ -74,14 +74,5 @@
 			/WEB-INF/g-servlet.xml
 		</param-value>
     </context-param>
-
-	<session-config>
-		<tracking-mode>COOKIE</tracking-mode>
-		<cookie-config>
-			<!--<name>Parakeet</name>-->
-			<!--<secure>true</secure>-->
-		</cookie-config>
-	</session-config>
-
-
+	
 </web-app>

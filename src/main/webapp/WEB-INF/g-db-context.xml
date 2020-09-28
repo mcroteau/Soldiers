@@ -12,12 +12,6 @@
  	
 	<bean id="roleDao" class="xyz.ioc.dao.impl.jdbc.RoleDaoJdbc"/>
 	<bean id="accountDao" class="xyz.ioc.dao.impl.jdbc.AccountDaoJdbc"/>
-	<bean id="postDao" class="xyz.ioc.dao.impl.jdbc.PostDaoJdbc"/>
-	<bean id="connectionDao" class="xyz.ioc.dao.impl.jdbc.FriendDaoJdbc"/>
-	<bean id="musicDao" class="xyz.ioc.dao.impl.jdbc.MusicDaoJdbc"/>
-	<bean id="notificationDao" class="xyz.ioc.dao.impl.jdbc.NotificationDaoJdbc"/>
-	<bean id="resourceDao" class="xyz.ioc.dao.impl.jdbc.ResourceDaoJdbc"/>
-	<bean id="messageDao" class="xyz.ioc.dao.impl.jdbc.MessageDaoJdbc"/>
 
 	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
 		<property name="dataSource" ref="dataSource" />

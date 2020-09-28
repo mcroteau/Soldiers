@@ -24,7 +24,6 @@
 	<context:component-scan base-package="xyz.ioc.web"/>
 
 	<mvc:interceptors>
-		<bean id="appSessionInterceptor" class="xyz.ioc.interceptors.AppInterceptor"/>
 		<bean id="deviceResolverHandlerInterceptor" class="org.springframework.mobile.device.DeviceResolverHandlerInterceptor"/>
 	</mvc:interceptors>
 
